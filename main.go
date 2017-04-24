@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Masterminds/sprig"
+	"io/ioutil"
 	"os"
 	"text/template"
 )
@@ -14,6 +16,7 @@ func main() {
 		err          error
 		tpl          *template.Template
 		decoder      *json.Decoder
+		content      []byte
 	)
 
 	if len(os.Args) != 2 {
@@ -28,7 +31,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	tpl = template.Must(template.ParseGlob(templateFile))
+	content, err = ioutil.ReadFile(templateFile)
+
+	if err != nil {
+		panic(err)
+	}
+
+	tpl, err = template.New("").Funcs(sprig.TxtFuncMap()).Parse(string(content))
+
+	if err != nil {
+		panic(err)
+	}
 
 	decoder = json.NewDecoder(os.Stdin)
 
